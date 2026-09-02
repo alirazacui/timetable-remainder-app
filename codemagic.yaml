@@ -5,6 +5,28 @@ workflows:
     environment:
       flutter: stable
     scripts:
+      - name: Generate missing android/ios platform files
+        script: |
+          if [ ! -f "android/app/build.gradle" ]; then
+            flutter create . --platforms=android --org com.alirazacui.timetablereminder
+          fi
+      - name: Add notification permissions to AndroidManifest
+        script: |
+          python3 - <<'PY'
+          import re
+          path = "android/app/src/main/AndroidManifest.xml"
+          with open(path) as f:
+              content = f.read()
+          if "SCHEDULE_EXACT_ALARM" not in content:
+              content = re.sub(
+                  r'(<manifest[^>]*>)',
+                  r'\1\n    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>\n    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>',
+                  content,
+                  count=1,
+              )
+              with open(path, "w") as f:
+                  f.write(content)
+          PY
       - name: Get Flutter packages
         script: flutter pub get
       - name: Build APK (release)
