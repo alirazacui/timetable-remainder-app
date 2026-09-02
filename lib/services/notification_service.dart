@@ -130,7 +130,7 @@ class NotificationService {
     required String body,
     required tz.TZDateTime time,
   }) async {
-    await _plugin.zonedSchedule(
+     await _plugin.zonedSchedule(
       id,
       title,
       body,
@@ -145,6 +145,8 @@ class NotificationService {
         ),
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
       matchDateTimeComponents: null,
     );
   }
