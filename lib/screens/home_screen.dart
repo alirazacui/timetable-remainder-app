@@ -122,27 +122,30 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 const SizedBox(height: 18),
                 AnimatedEntrance(
-                  title: 'Good morning, Sir',
-                  subtitle: 'Your teaching day at a glance',
-                  child: _loadingSchedule
-                      ? const Center(child: Padding(
-                          padding: EdgeInsets.symmetric(vertical: 24),
-                          child: CircularProgressIndicator(),
-                        ))
-                      : Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('NEXT CLASS', style: Theme.of(context).textTheme.labelLarge?.copyWith(letterSpacing: 1.2, color: const Color(0xFF0F766E))),
-                            const SizedBox(height: 8),
-                            Text(nextClassName, style: Theme.of(context).textTheme.headlineSmall),
-                            const SizedBox(height: 4),
-                            Text(nextClassTime, style: Theme.of(context).textTheme.bodyLarge),
-                            if (nextClassCountdown.isNotEmpty) ...[
-                              const SizedBox(height: 6),
-                              Text(nextClassCountdown, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700, color: const Color(0xFFF97316))),
+                  child: _HeroCard(
+                    title: 'Good morning, Sir',
+                    subtitle: 'Your teaching day at a glance',
+                    child: _loadingSchedule
+                        ? const Center(
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(vertical: 24),
+                              child: CircularProgressIndicator(),
+                            ),
+                          )
+                        : Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('NEXT CLASS', style: Theme.of(context).textTheme.labelLarge?.copyWith(letterSpacing: 1.2, color: Colors.white.withOpacity(0.9))),
+                              const SizedBox(height: 8),
+                              Text(nextClassName, style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: Colors.white)),
+                              const SizedBox(height: 4),
+                              Text(nextClassTime, style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.white.withOpacity(0.88))),
+                              if (nextClassCountdown.isNotEmpty) ...[
+                                const SizedBox(height: 6),
+                                Text(nextClassCountdown, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700, color: const Color(0xFFFDE68A))),
+                              ],
                             ],
-                          ],
-                        ),
+                          ),
                 ),
                 const SizedBox(height: 14),
                 AnimatedEntrance(
