@@ -8,10 +8,12 @@ import '../models/period_slot.dart';
 import '../models/timetable_entry.dart';
 import 'storage_service.dart';
 
-/// Schedules three kinds of reminders per lecture, for the next 7 days:
+/// Schedules daily reminders for the next 7 days:
 ///  - a morning summary (once a day, at a time you set)
-///  - "prepare" reminder 20 minutes before the lecture starts
-///  - "walk to class" reminder 5 minutes before the lecture starts
+///  - 10-minute warning before the lecture starts
+///  - 5-minute walking reminder before the lecture starts
+///  - class-start notification
+///  - class-end notification
 ///
 /// Re-run scheduleAll() whenever the timetable/bell timings are edited, and
 /// ideally once a week (it only ever looks 7 days ahead) — the Home screen
@@ -47,6 +49,7 @@ class NotificationService {
     final periods = await _storage.loadPeriods();
     final entries = await _storage.loadEntries();
     final morningTimeStr = await _storage.loadMorningTime();
+    final settings = await _storage.loadNotificationSettings();
     final morningParts = morningTimeStr.split(':');
     final morningHour = int.parse(morningParts[0]);
     final morningMinute = int.parse(morningParts[1]);
@@ -72,7 +75,7 @@ class NotificationService {
       // 1) Morning summary
       final morningTime = tz.TZDateTime(tz.local, date.year, date.month,
           date.day, morningHour, morningMinute);
-      if (morningTime.isAfter(now)) {
+      if (settings['morning'] == true && morningTime.isAfter(now)) {
         final summary = todaysEntries.map((e) {
           final slot = periodsById[e.periodSlotId];
           final label = slot?.label ?? 'Period';
@@ -87,7 +90,7 @@ class NotificationService {
         scheduledCount++;
       }
 
-      // 2) Per-lecture 20-min and 5-min reminders
+      // 2) Per-lecture reminders
       for (final entry in todaysEntries) {
         final slot = periodsById[entry.periodSlotId];
         if (slot == null || !slot.isTeachingPeriod) continue;
@@ -95,26 +98,46 @@ class NotificationService {
         final lectureStart = tz.TZDateTime(tz.local, date.year, date.month,
             date.day, slot.start.hour, slot.start.minute);
 
-        final prep = lectureStart.subtract(const Duration(minutes: 20));
+        final prep = lectureStart.subtract(const Duration(minutes: 10));
         final walk = lectureStart.subtract(const Duration(minutes: 5));
+        final end = tz.TZDateTime(tz.local, date.year, date.month, date.day,
+            slot.end.hour, slot.end.minute);
 
-        if (prep.isAfter(now)) {
+        if (settings['tenMinute'] == true && prep.isAfter(now)) {
           await _zonedSchedule(
             id: _idFor(date, 'prep', entry.hashCode),
-            title: 'Get ready',
+            title: '10 Minutes Remaining',
             body:
-                'Sir, ${slot.label} (${entry.className}) 20 minute mein shuru hoga — prepare ho jayein.',
+                'Sir, ${entry.className} starts in 10 minutes. Check everything is ready.',
             time: prep,
           );
           scheduledCount++;
         }
-        if (walk.isAfter(now)) {
+        if (settings['fiveMinute'] == true && walk.isAfter(now)) {
           await _zonedSchedule(
             id: _idFor(date, 'walk', entry.hashCode),
-            title: 'Time to move',
+            title: '5 Minutes Remaining',
             body:
-                'Sir, ${slot.label} (${entry.className}) 5 minute mein shuru hoga — class ki taraf chalna shuru karein.',
+                'Sir, start walking toward ${entry.className}.',
             time: walk,
+          );
+          scheduledCount++;
+        }
+        if (settings['start'] == true && lectureStart.isAfter(now)) {
+          await _zonedSchedule(
+            id: _idFor(date, 'start', entry.hashCode),
+            title: 'Class Started',
+            body: 'Sir, it\'s time for ${entry.className}.',
+            time: lectureStart,
+          );
+          scheduledCount++;
+        }
+        if (settings['end'] == true && end.isAfter(now)) {
+          await _zonedSchedule(
+            id: _idFor(date, 'end', entry.hashCode),
+            title: 'Lecture Finished',
+            body: '${entry.className} is finished.',
+            time: end,
           );
           scheduledCount++;
         }
@@ -129,7 +152,7 @@ class NotificationService {
     required String body,
     required tz.TZDateTime time,
   }) async {
-     await _plugin.zonedSchedule(
+    await _plugin.zonedSchedule(
       id,
       title,
       body,

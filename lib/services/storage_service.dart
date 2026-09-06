@@ -10,6 +10,37 @@ class StorageService {
   static const _periodsKey = 'period_slots';
   static const _entriesKey = 'timetable_entries';
   static const _morningTimeKey = 'morning_summary_time'; // "HH:mm"
+  static const _morningEnabledKey = 'morning_summary_enabled';
+  static const _tenMinuteEnabledKey = 'ten_minute_enabled';
+  static const _fiveMinuteEnabledKey = 'five_minute_enabled';
+  static const _startEnabledKey = 'class_start_enabled';
+  static const _endEnabledKey = 'class_end_enabled';
+
+  Future<Map<String, bool>> loadNotificationSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    return {
+      'morning': prefs.getBool(_morningEnabledKey) ?? true,
+      'tenMinute': prefs.getBool(_tenMinuteEnabledKey) ?? true,
+      'fiveMinute': prefs.getBool(_fiveMinuteEnabledKey) ?? true,
+      'start': prefs.getBool(_startEnabledKey) ?? true,
+      'end': prefs.getBool(_endEnabledKey) ?? false,
+    };
+  }
+
+  Future<void> saveNotificationSettings({
+    required bool morning,
+    required bool tenMinute,
+    required bool fiveMinute,
+    required bool start,
+    required bool end,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_morningEnabledKey, morning);
+    await prefs.setBool(_tenMinuteEnabledKey, tenMinute);
+    await prefs.setBool(_fiveMinuteEnabledKey, fiveMinute);
+    await prefs.setBool(_startEnabledKey, start);
+    await prefs.setBool(_endEnabledKey, end);
+  }
 
   Future<List<PeriodSlot>> loadPeriods() async {
     final prefs = await SharedPreferences.getInstance();

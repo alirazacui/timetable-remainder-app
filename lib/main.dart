@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'screens/home_screen.dart';
+import 'theme/app_theme.dart';
 
 void main() {
   runApp(const LectureReminderApp());
@@ -11,11 +12,9 @@ class LectureReminderApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Lecture Reminders',
-      theme: ThemeData(
-        colorSchemeSeed: Colors.indigo,
-        useMaterial3: true,
-      ),
+      title: 'Sir Schedule',
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.light(),
       home: const HomeScreen(),
     );
   }

@@ -16,9 +16,9 @@ dependencies:
   uuid: ^4.4.0
 
   # PDF import feature
-  file_picker: ^8.1.2
-  syncfusion_flutter_pdf: ^27.1.48
   permission_handler: ^11.3.1
+  image_picker: ^1.1.2
+  google_mlkit_text_recognition: ^0.14.0
 
 dev_dependencies:
   flutter_test:

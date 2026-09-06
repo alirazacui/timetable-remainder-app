@@ -144,32 +144,134 @@ class _BellTimingsScreenState extends State<BellTimingsScreen> {
         onPressed: () => _editSlot(),
         child: const Icon(Icons.add),
       ),
-      body: ListView(
-        children: [
-          _sectionHeader('Monday - Thursday'),
-          ...monThu.map(_tile),
-          _sectionHeader('Friday'),
-          ...fri.map(_tile),
-        ],
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFFE8F4F1), Color(0xFFF5F1EA), Color(0xFFF8FAFC)],
+          ),
+        ),
+        child: SafeArea(
+          child: ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              _HeaderCard(
+                title: 'Bell Timings',
+                subtitle: 'Separate timing sets for Mon-Thu and Friday.',
+                icon: Icons.schedule_rounded,
+              ),
+              const SizedBox(height: 16),
+              _SectionCard(title: 'Monday - Thursday', children: monThu.map(_tile).toList()),
+              const SizedBox(height: 12),
+              _SectionCard(title: 'Friday', children: fri.map(_tile).toList()),
+            ],
+          ),
+        ),
       ),
     );
   }
 
-  Widget _sectionHeader(String text) => Padding(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-        child: Text(text, style: const TextStyle(fontWeight: FontWeight.bold)),
-      );
-
-  Widget _tile(PeriodSlot p) => ListTile(
-        title: Text('${p.label} ${p.isTeachingPeriod ? "" : "(non-teaching)"}'),
-        subtitle: Text('${p.start.format(context)} - ${p.end.format(context)}'),
-        onTap: () => _editSlot(existing: p),
-        trailing: IconButton(
-          icon: const Icon(Icons.delete_outline),
-          onPressed: () {
-            setState(() => _periods.removeWhere((x) => x.id == p.id));
-            _save();
-          },
+  Widget _tile(PeriodSlot p) => Container(
+        margin: const EdgeInsets.only(bottom: 10),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF8FAFC),
+          borderRadius: BorderRadius.circular(18),
+        ),
+        child: ListTile(
+          contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+          leading: Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(colors: [Color(0xFFF97316), Color(0xFFFB7185)]),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Center(child: Text('${p.periodNumber}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800))),
+          ),
+          title: Text(p.label, style: const TextStyle(fontWeight: FontWeight.w700)),
+          subtitle: Text('${p.start.format(context)} - ${p.end.format(context)}${p.isTeachingPeriod ? '' : ' • non-teaching'}'),
+          onTap: () => _editSlot(existing: p),
+          trailing: IconButton(
+            icon: const Icon(Icons.delete_outline),
+            onPressed: () {
+              setState(() => _periods.removeWhere((x) => x.id == p.id));
+              _save();
+            },
+          ),
         ),
       );
+}
+
+class _HeaderCard extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final IconData icon;
+
+  const _HeaderCard({required this.title, required this.subtitle, required this.icon});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(colors: [Color(0xFF0F766E), Color(0xFF164E63)]),
+        borderRadius: BorderRadius.circular(28),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(color: Colors.white.withOpacity(0.15), borderRadius: BorderRadius.circular(18)),
+            child: Icon(icon, color: Colors.white),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.w800)),
+                const SizedBox(height: 4),
+                Text(subtitle, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white.withOpacity(0.88))),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SectionCard extends StatelessWidget {
+  final String title;
+  final List<Widget> children;
+
+  const _SectionCard({required this.title, required this.children});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(26),
+        border: Border.all(color: Colors.black.withOpacity(0.05)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
+          const SizedBox(height: 10),
+          if (children.isEmpty)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 12),
+              child: Text('No timings stored yet.'),
+            )
+          else
+            ...children,
+        ],
+      ),
+    );
+  }
 }
