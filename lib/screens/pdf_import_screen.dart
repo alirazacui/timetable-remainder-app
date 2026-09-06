@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../services/ocr_schedule_parser_service.dart';
+import '../widgets/app_motion.dart';
 import 'schedule_review_screen.dart';
 
 enum _ImportTarget { timetableOnly, bellOnly, both }
@@ -53,8 +54,8 @@ class _PdfImportScreenState extends State<PdfImportScreen> {
 
       await Navigator.push(
         context,
-        MaterialPageRoute(
-          builder: (_) => ScheduleReviewScreen(
+        buildPageRoute(
+          ScheduleReviewScreen(
             initialResult: result,
             importBellTimings: _target != _ImportTarget.timetableOnly,
             importTimetable: _target != _ImportTarget.bellOnly,
@@ -165,7 +166,7 @@ class _PdfImportScreenState extends State<PdfImportScreen> {
                 title: 'Before save',
                 child: const ListTile(
                   contentPadding: EdgeInsets.zero,
-                  leading: Icon(Icons.edit_document_rounded),
+                  leading: Icon(Icons.fact_check_rounded),
                   title: Text('Review the extracted schedule'),
                   subtitle: Text('You can correct the timetable and bell data before anything is stored on the phone.'),
                 ),

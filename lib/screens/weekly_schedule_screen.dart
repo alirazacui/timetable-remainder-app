@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../services/schedule_service.dart';
+import '../widgets/app_motion.dart';
+import '../widgets/animated_entrance.dart';
 
 class WeeklyScheduleScreen extends StatefulWidget {
   const WeeklyScheduleScreen({super.key});
@@ -55,10 +57,12 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
               : ListView(
                   padding: const EdgeInsets.all(16),
                   children: [
-                    _HeaderCard(
-                      title: 'Weekly Schedule',
-                      subtitle: 'A clean view of Monday to Friday.',
-                      icon: Icons.view_week_rounded,
+                    const AnimatedEntrance(
+                      child: _HeaderCard(
+                        title: 'Weekly Schedule',
+                        subtitle: 'A clean view of Monday to Friday.',
+                        icon: Icons.view_week_rounded,
+                      ),
                     ),
                     const SizedBox(height: 16),
                     ...[
@@ -67,69 +71,73 @@ class _WeeklyScheduleScreenState extends State<WeeklyScheduleScreen> {
                       DateTime.wednesday,
                       DateTime.thursday,
                       DateTime.friday,
-                    ].map((weekday) {
+                    ].asMap().entries.map((entry) {
+                      final weekday = entry.value;
                       final lectures = _week[weekday] ?? const <ScheduledLecture>[];
-                      return Container(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(24),
-                          border: Border.all(color: Colors.black.withOpacity(0.05)),
-                        ),
-                        child: ExpansionTile(
-                          tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                          leading: Container(
-                            width: 44,
-                            height: 44,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFE7F2F1),
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            child: Center(child: Text(_dayShort(weekday), style: const TextStyle(fontWeight: FontWeight.w800, color: Color(0xFF0F766E)))),
+                      return AnimatedEntrance(
+                        delay: Duration(milliseconds: 80 + (entry.key * 40)),
+                        child: Container(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(24),
+                            border: Border.all(color: Colors.black.withOpacity(0.05)),
                           ),
-                          title: Text(_weekdayName(weekday), style: Theme.of(context).textTheme.titleMedium),
-                          subtitle: Text('${lectures.length} lecture${lectures.length == 1 ? '' : 's'}'),
-                          children: lectures.isEmpty
-                              ? [
-                                  const _EmptyWeekCard(),
-                                ]
-                              : lectures
-                                  .map(
-                                    (lecture) => Container(
-                                      margin: const EdgeInsets.only(bottom: 10),
-                                      padding: const EdgeInsets.all(14),
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xFFF8FAFC),
-                                        borderRadius: BorderRadius.circular(18),
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          Container(
-                                            width: 46,
-                                            height: 46,
-                                            decoration: BoxDecoration(
-                                              gradient: const LinearGradient(colors: [Color(0xFFF97316), Color(0xFFFB7185)]),
-                                              borderRadius: BorderRadius.circular(14),
+                          child: ExpansionTile(
+                            tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                            leading: Container(
+                              width: 44,
+                              height: 44,
+                              decoration: BoxDecoration(
+                                color: dayAccentColor(weekday).withOpacity(0.14),
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              child: Center(child: Text(_dayShort(weekday), style: TextStyle(fontWeight: FontWeight.w800, color: dayAccentColor(weekday)))),
+                            ),
+                            title: Text(_weekdayName(weekday), style: Theme.of(context).textTheme.titleMedium),
+                            subtitle: Text('${lectures.length} lecture${lectures.length == 1 ? '' : 's'}'),
+                            children: lectures.isEmpty
+                                ? [
+                                    const _EmptyWeekCard(),
+                                  ]
+                                : lectures
+                                    .map(
+                                      (lecture) => Container(
+                                        margin: const EdgeInsets.only(bottom: 10),
+                                        padding: const EdgeInsets.all(14),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFFF8FAFC),
+                                          borderRadius: BorderRadius.circular(18),
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            Container(
+                                              width: 46,
+                                              height: 46,
+                                              decoration: BoxDecoration(
+                                                gradient: LinearGradient(colors: [dayAccentColor(weekday), periodAccentColor(lecture.slot.periodNumber)]),
+                                                borderRadius: BorderRadius.circular(14),
+                                              ),
+                                              child: Center(child: Text('P${lecture.slot.periodNumber}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800))),
                                             ),
-                                            child: Center(child: Text('P${lecture.slot.periodNumber}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800))),
-                                          ),
-                                          const SizedBox(width: 12),
-                                          Expanded(
-                                            child: Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                Text(lecture.entry.className, style: Theme.of(context).textTheme.titleSmall),
-                                                const SizedBox(height: 2),
-                                                Text(_scheduleService.formatRange(lecture), style: Theme.of(context).textTheme.bodyMedium),
-                                              ],
+                                            const SizedBox(width: 12),
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(lecture.entry.className, style: Theme.of(context).textTheme.titleSmall),
+                                                  const SizedBox(height: 2),
+                                                  Text(_scheduleService.formatRange(lecture), style: Theme.of(context).textTheme.bodyMedium),
+                                                ],
+                                              ),
                                             ),
-                                          ),
-                                        ],
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                  )
-                                  .toList(),
+                                    )
+                                    .toList(),
+                          ),
                         ),
                       );
                     }),

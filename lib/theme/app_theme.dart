@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
   static const Color _seed = Color(0xFF0F766E);
@@ -33,7 +34,7 @@ class AppTheme {
           color: Color(0xFF102A43),
         ),
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: _surface,
         elevation: 0,
         margin: EdgeInsets.zero,
@@ -96,6 +97,7 @@ class AppTheme {
         bodyLarge: TextStyle(color: Color(0xFF344054), height: 1.35),
         bodyMedium: TextStyle(color: Color(0xFF475467), height: 1.35),
       ),
+      fontFamily: GoogleFonts.manrope().fontFamily,
       dividerTheme: DividerThemeData(color: Colors.black.withOpacity(0.08), thickness: 1),
     );
   }

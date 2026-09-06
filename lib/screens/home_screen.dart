@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../services/storage_service.dart';
 import '../services/notification_service.dart';
 import '../services/schedule_service.dart';
+import '../widgets/app_motion.dart';
+import '../widgets/animated_entrance.dart';
 import 'pdf_import_screen.dart';
 import 'bell_timings_screen.dart';
 import 'timetable_screen.dart';
@@ -89,35 +91,37 @@ class _HomeScreenState extends State<HomeScreen> {
             child: ListView(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
               children: [
-                Row(
-                  children: [
-                    Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(colors: [Color(0xFF0F766E), Color(0xFF14B8A6)]),
-                        borderRadius: BorderRadius.circular(16),
+                AnimatedEntrance(
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(colors: [Color(0xFF0F766E), Color(0xFF14B8A6)]),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: const Icon(Icons.school_rounded, color: Colors.white),
                       ),
-                      child: const Icon(Icons.school_rounded, color: Colors.white),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Sir Schedule', style: Theme.of(context).textTheme.titleLarge),
-                          Text('Today — $todayName', style: Theme.of(context).textTheme.bodyMedium),
-                        ],
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Sir Schedule', style: Theme.of(context).textTheme.titleLarge),
+                            Text('Today — $todayName', style: Theme.of(context).textTheme.bodyMedium),
+                          ],
+                        ),
                       ),
-                    ),
-                    IconButton.filledTonal(
-                      onPressed: _pickMorningTime,
-                      icon: const Icon(Icons.alarm_add_rounded),
-                    ),
-                  ],
+                      IconButton.filledTonal(
+                        onPressed: _pickMorningTime,
+                        icon: const Icon(Icons.alarm_add_rounded),
+                      ),
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 18),
-                _HeroCard(
+                AnimatedEntrance(
                   title: 'Good morning, Sir',
                   subtitle: 'Your teaching day at a glance',
                   child: _loadingSchedule
@@ -141,97 +145,124 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                 ),
                 const SizedBox(height: 14),
-                Row(
-                  children: [
-                    Expanded(child: _StatPill(label: 'Periods', value: '$_periodCount')),
-                    const SizedBox(width: 10),
-                    Expanded(child: _StatPill(label: 'Lectures', value: '$_entryCount')),
-                    const SizedBox(width: 10),
-                    Expanded(child: _StatPill(label: 'Morning', value: _morningTime.format(context))),
-                  ],
+                AnimatedEntrance(
+                  delay: const Duration(milliseconds: 60),
+                  child: Row(
+                    children: [
+                      Expanded(child: _StatPill(label: 'Periods', value: '$_periodCount')),
+                      const SizedBox(width: 10),
+                      Expanded(child: _StatPill(label: 'Lectures', value: '$_entryCount')),
+                      const SizedBox(width: 10),
+                      Expanded(child: _StatPill(label: 'Morning', value: _morningTime.format(context))),
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 18),
-                _SectionTitle(title: 'Today\'s Classes', action: _todayLectures.isEmpty ? null : TextButton(onPressed: _sync, child: const Text('Reschedule'))),
+                AnimatedEntrance(
+                  delay: const Duration(milliseconds: 100),
+                  child: _SectionTitle(title: 'Today\'s Classes', action: _todayLectures.isEmpty ? null : TextButton(onPressed: _sync, child: const Text('Reschedule'))),
+                ),
                 const SizedBox(height: 10),
                 if (_todayLectures.isEmpty)
-                  const _EmptyStateCard(
-                    icon: Icons.event_busy_rounded,
-                    title: 'No classes stored yet',
-                    subtitle: 'Scan or enter your timetable to see today\'s schedule here.',
+                  const AnimatedEntrance(
+                    delay: Duration(milliseconds: 140),
+                    child: _EmptyStateCard(
+                      icon: Icons.event_busy_rounded,
+                      title: 'No classes stored yet',
+                      subtitle: 'Scan or enter your timetable to see today\'s schedule here.',
+                    ),
                   )
                 else
-                  ..._todayLectures.map((lecture) => _LectureCard(
-                        lecture: lecture,
-                        scheduleService: _scheduleService,
+                  ..._todayLectures.asMap().entries.map((entry) => AnimatedEntrance(
+                        delay: Duration(milliseconds: 140 + (entry.key * 35)),
+                        child: _LectureCard(
+                          lecture: entry.value,
+                          scheduleService: _scheduleService,
+                        ),
                       )),
                 const SizedBox(height: 18),
-                _SectionTitle(title: 'Quick Actions'),
+                AnimatedEntrance(
+                  delay: const Duration(milliseconds: 180),
+                  child: _SectionTitle(title: 'Quick Actions'),
+                ),
                 const SizedBox(height: 10),
-                GridView(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 12,
-                    childAspectRatio: 1.18,
+                AnimatedEntrance(
+                  delay: const Duration(milliseconds: 220),
+                  child: GridView(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 12,
+                      childAspectRatio: 1.18,
+                    ),
+                    children: [
+                      _ActionCard(
+                        icon: Icons.qr_code_scanner_rounded,
+                        title: 'Scan / Import',
+                        subtitle: 'OCR from camera or gallery',
+                        onTap: () async {
+                          await Navigator.push(context, buildPageRoute(const PdfImportScreen()));
+                          _refresh();
+                        },
+                      ),
+                      _ActionCard(
+                        icon: Icons.view_week_rounded,
+                        title: 'Weekly Schedule',
+                        subtitle: 'Monday to Friday overview',
+                        onTap: () async {
+                          await Navigator.push(context, buildPageRoute(const WeeklyScheduleScreen()));
+                          _refresh();
+                        },
+                      ),
+                      _ActionCard(
+                        icon: Icons.schedule_rounded,
+                        title: 'Bell Timings',
+                        subtitle: 'Edit period timings',
+                        onTap: () async {
+                          await Navigator.push(context, buildPageRoute(const BellTimingsScreen()));
+                          _refresh();
+                        },
+                      ),
+                      _ActionCard(
+                        icon: Icons.settings_rounded,
+                        title: 'Settings',
+                        subtitle: 'Notifications and reminders',
+                        onTap: () async {
+                          await Navigator.push(context, buildPageRoute(const SettingsScreen()));
+                          _refresh();
+                        },
+                      ),
+                    ],
                   ),
-                  children: [
-                    _ActionCard(
-                      icon: Icons.qr_code_scanner_rounded,
-                      title: 'Scan / Import',
-                      subtitle: 'OCR from camera or gallery',
-                      onTap: () async {
-                        await Navigator.push(context, MaterialPageRoute(builder: (_) => const PdfImportScreen()));
-                        _refresh();
-                      },
-                    ),
-                    _ActionCard(
-                      icon: Icons.view_week_rounded,
-                      title: 'Weekly Schedule',
-                      subtitle: 'Monday to Friday overview',
-                      onTap: () async {
-                        await Navigator.push(context, MaterialPageRoute(builder: (_) => const WeeklyScheduleScreen()));
-                        _refresh();
-                      },
-                    ),
-                    _ActionCard(
-                      icon: Icons.schedule_rounded,
-                      title: 'Bell Timings',
-                      subtitle: 'Edit period timings',
-                      onTap: () async {
-                        await Navigator.push(context, MaterialPageRoute(builder: (_) => const BellTimingsScreen()));
-                        _refresh();
-                      },
-                    ),
-                    _ActionCard(
-                      icon: Icons.settings_rounded,
-                      title: 'Settings',
-                      subtitle: 'Notifications and reminders',
-                      onTap: () async {
-                        await Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen()));
-                        _refresh();
-                      },
-                    ),
-                  ],
                 ),
                 const SizedBox(height: 18),
-                _SectionTitle(title: 'Status & Sync'),
+                AnimatedEntrance(
+                  delay: const Duration(milliseconds: 260),
+                  child: _SectionTitle(title: 'Status & Sync'),
+                ),
                 const SizedBox(height: 10),
-                _ActionStrip(
-                  primaryLabel: 'Sync notifications',
-                  onPrimary: _sync,
-                  secondaryLabel: 'Edit timetable',
-                  onSecondary: () async {
-                    await Navigator.push(context, MaterialPageRoute(builder: (_) => const TimetableScreen()));
-                    _refresh();
-                  },
+                AnimatedEntrance(
+                  delay: const Duration(milliseconds: 300),
+                  child: _ActionStrip(
+                    primaryLabel: 'Sync notifications',
+                    onPrimary: _sync,
+                    secondaryLabel: 'Edit timetable',
+                    onSecondary: () async {
+                      await Navigator.push(context, buildPageRoute(const TimetableScreen()));
+                      _refresh();
+                    },
+                  ),
                 ),
                 if (_status.isNotEmpty) ...[
                   const SizedBox(height: 10),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                    child: Text(_status, textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600)),
+                  AnimatedEntrance(
+                    delay: const Duration(milliseconds: 340),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: Text(_status, textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600)),
+                    ),
                   ),
                 ],
               ],

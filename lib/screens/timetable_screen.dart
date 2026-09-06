@@ -3,6 +3,7 @@ import 'package:uuid/uuid.dart';
 import '../models/period_slot.dart';
 import '../models/timetable_entry.dart';
 import '../services/storage_service.dart';
+import '../widgets/app_motion.dart';
 
 const _weekdayNames = {
   DateTime.monday: 'Monday',
@@ -188,7 +189,12 @@ class _TimetableScreenState extends State<TimetableScreen> {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(24),
-                    border: Border.all(color: Colors.black.withOpacity(0.05)),
+                      border: Border.all(color: dayAccentColor(day.key).withOpacity(0.08)),
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [Colors.white, dayAccentColor(day.key).withOpacity(0.03)],
+                      ),
                   ),
                   child: ExpansionTile(
                     tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -197,10 +203,10 @@ class _TimetableScreenState extends State<TimetableScreen> {
                       width: 44,
                       height: 44,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFE7F2F1),
+                          color: dayAccentColor(day.key).withOpacity(0.14),
                         borderRadius: BorderRadius.circular(14),
                       ),
-                      child: Center(child: Text(day.value.substring(0, 2), style: const TextStyle(fontWeight: FontWeight.w800, color: Color(0xFF0F766E)))),
+                        child: Center(child: Text(day.value.substring(0, 2), style: TextStyle(fontWeight: FontWeight.w800, color: dayAccentColor(day.key)))),
                     ),
                     title: Text(day.value, style: Theme.of(context).textTheme.titleMedium),
                     subtitle: Text('${dayEntries.length} lecture${dayEntries.length == 1 ? '' : 's'}'),
@@ -213,13 +219,14 @@ class _TimetableScreenState extends State<TimetableScreen> {
                               decoration: BoxDecoration(
                                 color: const Color(0xFFF8FAFC),
                                 borderRadius: BorderRadius.circular(18),
+                                border: Border(left: BorderSide(color: dayAccentColor(day.key).withOpacity(0.8), width: 4)),
                               ),
                               child: ListTile(
                                 leading: Container(
                                   width: 44,
                                   height: 44,
                                   decoration: BoxDecoration(
-                                    gradient: const LinearGradient(colors: [Color(0xFFF97316), Color(0xFFFB7185)]),
+                                    gradient: LinearGradient(colors: [dayAccentColor(day.key), periodAccentColor(slot?.periodNumber ?? 0)]),
                                     borderRadius: BorderRadius.circular(14),
                                   ),
                                   child: Center(child: Text('P${slot?.periodNumber ?? 0}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800))),

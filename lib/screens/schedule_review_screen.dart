@@ -5,6 +5,8 @@ import '../models/period_slot.dart';
 import '../models/timetable_entry.dart';
 import '../services/ocr_schedule_parser_service.dart';
 import '../services/storage_service.dart';
+import '../widgets/app_motion.dart';
+import '../widgets/animated_entrance.dart';
 
 class ScheduleReviewScreen extends StatefulWidget {
   final OcrScheduleResult initialResult;
@@ -273,33 +275,41 @@ class _ScheduleReviewScreenState extends State<ScheduleReviewScreen> {
           child: ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              _HeaderCard(
-                title: 'Review & Edit Schedule',
-                subtitle: 'Correct OCR results before saving to the phone.',
-                icon: Icons.fact_check_rounded,
+              const AnimatedEntrance(
+                child: _HeaderCard(
+                  title: 'Review & Edit Schedule',
+                  subtitle: 'Correct OCR results before saving to the phone.',
+                  icon: Icons.fact_check_rounded,
+                ),
               ),
               const SizedBox(height: 16),
               if (widget.importBellTimings) ...[
-                _SectionCard(
-                  title: 'Bell timings',
-                  trailing: TextButton.icon(
-                    onPressed: _saving ? null : () => _editBell(),
-                    icon: const Icon(Icons.add),
-                    label: const Text('Add'),
+                AnimatedEntrance(
+                  delay: const Duration(milliseconds: 70),
+                  child: _SectionCard(
+                    title: 'Bell timings',
+                    trailing: TextButton.icon(
+                      onPressed: _saving ? null : () => _editBell(),
+                      icon: const Icon(Icons.add),
+                      label: const Text('Add'),
+                    ),
+                    child: Column(children: _bellTimings.isEmpty ? [const Padding(padding: EdgeInsets.symmetric(vertical: 8), child: Text('No bell timings detected.'))] : _bellTimings.map((slot) => _BellDraftTile(slot: slot, onTap: () => _editBell(existing: slot), onDelete: () => setState(() => _bellTimings.removeWhere((x) => x.id == slot.id)))).toList()),
                   ),
-                  child: Column(children: _bellTimings.isEmpty ? [const Padding(padding: EdgeInsets.symmetric(vertical: 8), child: Text('No bell timings detected.'))] : _bellTimings.map((slot) => _BellDraftTile(slot: slot, onTap: () => _editBell(existing: slot), onDelete: () => setState(() => _bellTimings.removeWhere((x) => x.id == slot.id)))).toList()),
                 ),
                 const SizedBox(height: 14),
               ],
               if (widget.importTimetable) ...[
-                _SectionCard(
-                  title: 'Timetable',
-                  trailing: TextButton.icon(
-                    onPressed: _saving ? null : () => _editEntry(),
-                    icon: const Icon(Icons.add),
-                    label: const Text('Add'),
+                AnimatedEntrance(
+                  delay: const Duration(milliseconds: 120),
+                  child: _SectionCard(
+                    title: 'Timetable',
+                    trailing: TextButton.icon(
+                      onPressed: _saving ? null : () => _editEntry(),
+                      icon: const Icon(Icons.add),
+                      label: const Text('Add'),
+                    ),
+                    child: Column(children: _groupedEntries(periodsById)),
                   ),
-                  child: Column(children: _groupedEntries(periodsById)),
                 ),
               ],
               if (_saving) ...[
@@ -353,8 +363,8 @@ class _ScheduleReviewScreenState extends State<ScheduleReviewScreen> {
           child: ExpansionTile(
             tilePadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
             childrenPadding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
-            title: Text(_weekdayName(day), style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800)),
-            subtitle: Text('${dayEntries.length} lecture${dayEntries.length == 1 ? '' : 's'}'),
+            title: Text(_weekdayName(day), style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800, color: dayAccentColor(day))),
+            subtitle: Text('${dayEntries.length} lecture${dayEntries.length == 1 ? '' : 's'}', style: TextStyle(color: dayAccentColor(day).withOpacity(0.75))),
             children: dayEntries.map((entry) {
               final slot = periodsById[entry.periodSlotId];
               return Container(
@@ -362,13 +372,14 @@ class _ScheduleReviewScreenState extends State<ScheduleReviewScreen> {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
+                  border: Border(left: BorderSide(color: dayAccentColor(day).withOpacity(0.8), width: 4)),
                 ),
                 child: ListTile(
                   leading: Container(
                     width: 42,
                     height: 42,
                     decoration: BoxDecoration(
-                      gradient: const LinearGradient(colors: [Color(0xFFF97316), Color(0xFFFB7185)]),
+                      gradient: LinearGradient(colors: [dayAccentColor(day), periodAccentColor(slot?.periodNumber ?? 0)]),
                       borderRadius: BorderRadius.circular(14),
                     ),
                     child: Center(child: Text('P${slot?.periodNumber ?? 0}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800))),
@@ -506,7 +517,7 @@ class _BellDraftTile extends StatelessWidget {
           width: 42,
           height: 42,
           decoration: BoxDecoration(
-            gradient: const LinearGradient(colors: [Color(0xFFF97316), Color(0xFFFB7185)]),
+            gradient: LinearGradient(colors: [dayAccentColor(slot.scheduleType == 'Fri' ? DateTime.friday : DateTime.monday), periodAccentColor(slot.periodNumber)]),
             borderRadius: BorderRadius.circular(14),
           ),
           child: Center(child: Text('${slot.periodNumber}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800))),
