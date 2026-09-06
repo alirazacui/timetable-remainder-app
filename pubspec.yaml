@@ -19,7 +19,7 @@ dependencies:
   # PDF import feature
   permission_handler: ^11.3.1
   image_picker: ^1.1.2
-  google_mlkit_text_recognition: ^0.14.0
+  google_mlkit_text_recognition: ^0.17.1
 
 dev_dependencies:
   flutter_test:

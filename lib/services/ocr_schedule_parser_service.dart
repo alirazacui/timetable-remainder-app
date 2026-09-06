@@ -65,6 +65,10 @@ class OcrScheduleParserService {
     );
   }
 
+  void close() {
+    _recognizer.close();
+  }
+
   List<PeriodSlot> _extractBellTimings(String text, List<String> warnings) {
     final lines = text.split('\n');
     final slots = <PeriodSlot>[];

@@ -25,6 +25,21 @@ class _PdfImportScreenState extends State<PdfImportScreen> {
   bool _busy = false;
   String _statusMessage = '';
 
+  @override
+  void dispose() {
+    _parser.close();
+    super.dispose();
+  }
+
+  Future<File> _copyPickedImageToTempFile(XFile picked) async {
+    final bytes = await picked.readAsBytes();
+    final extension = picked.name.contains('.') ? picked.name.substring(picked.name.lastIndexOf('.')) : '.jpg';
+    final tempPath = '${Directory.systemTemp.path}/sir_schedule_${DateTime.now().microsecondsSinceEpoch}$extension';
+    final tempFile = File(tempPath);
+    await tempFile.writeAsBytes(bytes, flush: true);
+    return tempFile;
+  }
+
   Future<void> _scan(ImageSource source) async {
     setState(() {
       _busy = true;
@@ -46,28 +61,36 @@ class _PdfImportScreenState extends State<PdfImportScreen> {
       }
 
       setState(() => _statusMessage = 'Reading text from image...');
-      final result = await _parser.parseImage(File(picked.path));
+      File? tempFile;
+      try {
+        tempFile = await _copyPickedImageToTempFile(picked);
+        final result = await _parser.parseImage(tempFile);
 
-      if (!mounted) return;
+        if (!mounted) return;
 
-      setState(() => _busy = false);
+        setState(() => _busy = false);
 
-      await Navigator.push(
-        context,
-        buildPageRoute(
-          ScheduleReviewScreen(
-            initialResult: result,
-            importBellTimings: _target != _ImportTarget.timetableOnly,
-            importTimetable: _target != _ImportTarget.bellOnly,
-            replaceExisting: _replaceExisting,
+        await Navigator.push(
+          context,
+          buildPageRoute(
+            ScheduleReviewScreen(
+              initialResult: result,
+              importBellTimings: _target != _ImportTarget.timetableOnly,
+              importTimetable: _target != _ImportTarget.bellOnly,
+              replaceExisting: _replaceExisting,
+            ),
           ),
-        ),
-      );
+        );
 
-      if (mounted) {
-        setState(() {
-          _statusMessage = 'Review finished. You can scan another sheet anytime.';
-        });
+        if (mounted) {
+          setState(() {
+            _statusMessage = 'Review finished. You can scan another sheet anytime.';
+          });
+        }
+      } finally {
+        if (tempFile != null && await tempFile.exists()) {
+          await tempFile.delete();
+        }
       }
     } catch (e) {
       if (!mounted) return;
@@ -80,8 +103,6 @@ class _PdfImportScreenState extends State<PdfImportScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
