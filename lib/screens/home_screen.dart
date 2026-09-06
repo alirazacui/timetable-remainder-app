@@ -147,6 +147,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ],
                           ),
                 ),
+                ),
                 const SizedBox(height: 14),
                 AnimatedEntrance(
                   delay: const Duration(milliseconds: 60),
@@ -166,23 +167,30 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: _SectionTitle(title: 'Today\'s Classes', action: _todayLectures.isEmpty ? null : TextButton(onPressed: _sync, child: const Text('Reschedule'))),
                 ),
                 const SizedBox(height: 10),
-                if (_todayLectures.isEmpty)
-                  const AnimatedEntrance(
-                    delay: Duration(milliseconds: 140),
-                    child: _EmptyStateCard(
-                      icon: Icons.event_busy_rounded,
-                      title: 'No classes stored yet',
-                      subtitle: 'Scan or enter your timetable to see today\'s schedule here.',
-                    ),
-                  )
-                else
-                  ..._todayLectures.asMap().entries.map((entry) => AnimatedEntrance(
-                        delay: Duration(milliseconds: 140 + (entry.key * 35)),
-                        child: _LectureCard(
-                          lecture: entry.value,
-                          scheduleService: _scheduleService,
+                ...(_todayLectures.isEmpty
+                    ? [
+                        const AnimatedEntrance(
+                          delay: Duration(milliseconds: 140),
+                          child: _EmptyStateCard(
+                            icon: Icons.event_busy_rounded,
+                            title: 'No classes stored yet',
+                            subtitle: 'Scan or enter your timetable to see today\'s schedule here.',
+                          ),
                         ),
-                      )),
+                      ]
+                    : _todayLectures
+                        .asMap()
+                        .entries
+                        .map(
+                          (entry) => AnimatedEntrance(
+                            delay: Duration(milliseconds: 140 + (entry.key * 35)),
+                            child: _LectureCard(
+                              lecture: entry.value,
+                              scheduleService: _scheduleService,
+                            ),
+                          ),
+                        )
+                        .toList()),
                 const SizedBox(height: 18),
                 AnimatedEntrance(
                   delay: const Duration(milliseconds: 180),
